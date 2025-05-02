@@ -8,7 +8,7 @@ main:
   stur  wzr, [x29, -4]      // isi fp-4 dengan 0 (padding untuk argc)
   stur  w0, [x29, -8]       // isi fp-8 dengan argc
   stur   x1, [sp, 16]       // isi sp+16 dengan argv
-  stur   wzr, [sp, 12]      // isi sp+12 dengan 0 (padding untuk argv)
+  stur   wzr, [sp, 12]      // isi sp+12 dengan 0 untuk iterator nanti
   b     .LoopLabel1
 
 .LoopLabel1:
