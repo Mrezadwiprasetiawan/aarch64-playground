@@ -1,43 +1,42 @@
 .global main
 .text
 main:
-  sub   sp, sp, 48
-  stp   x29, x30, [sp, 32]  // simpan 16 byte register address
-                            // x29(fp) ke sp+32 x30(link ret) ke sp+40
-  add   x29, sp, 32         // ubah fp ke sp+32
-  stur  wzr, [x29, -4]      // isi fp-4 dengan 0 (padding untuk argc)
-  stur  w0, [x29, -8]       // isi fp-8 dengan argc
-  stur   x1, [sp, 16]       // isi sp+16 dengan argv
-  stur   wzr, [sp, 12]      // isi sp+12 dengan 0 untuk iterator nanti
-  b     .LoopLabel1
+  sub   sp, sp, 48          // Alokasikan ruang stack 48 byte
+  stp   fp, lr, [sp, 32]  // Simpan frame pointer (x29) dan return address (x30)
+  add   fp, sp, 32         // Atur frame pointer (x29) ke sp+32
+  stur  wzr, [fp, -4]      // Inisialisasi argc di sp-4 (padding karena argc int)
+  stur  w0, [fp, -8]       // Simpan argc di sp-8
+  stur   x1, [sp, 16]       // Simpan argv di sp+16
+  stur   wzr, [sp, 12]      // Inisialisasi iterator (0) di sp+12
+  b     .LoopLabel1         // Mulai loop
 
 .LoopLabel1:
-  ldr   w8, [sp, 12]
-  ldur  w9, [x29, -8]
-  subs  w8, w8, w9
-  b.ge  .LoopLabel3
+  ldr   w8, [sp, 12]        // Ambil iterator
+  ldur  w9, [fp, -8]       // Ambil argc
+  subs  w8, w8, w9          // Periksa apakah iterator >= argc
+  b.ge  .LoopLabel3         // Jika ya, keluar dari loop
 
 .LoopLabel2:
-  ldr   x8, [sp, 16]
-  ldrsw x9, [sp, 12]
-  ldr   x1, [x8, x9, lsl #3]
-  adrp  x0, .L.str
-  add   x0, x0, :lo12:.L.str
-  bl    printf
- 
-  ldr   w8, [sp, #12]
-  add   w8, w8, #1
-  str   w8, [sp, #12]
-  b     .LoopLabel1
+  ldr   x8, [sp, 16]        // Ambil argv (pointer ke array argumen)
+  ldrsw x9, [sp, 12]        // Ambil iterator
+  ldr   x1, [x8, x9, lsl #3] // Ambil argv[iterator]
+  adrp  x0, .str            // Siapkan format string untuk printf
+  add   x0, x0, :lo12:.str  // Tambahkan offset ke alamat string
+  bl    printf              // Cetak argumen dengan printf
+
+  ldr   w8, [sp, #12]       // Ambil iterator
+  add   w8, w8, #1          // Increment iterator
+  str   w8, [sp, #12]       // Simpan kembali iterator
+  b     .LoopLabel1         // Ulangi loop
 
 .LoopLabel3:
-  mov   w0, wzr
-  ldp   x29, x30, [sp, #32]
-  add   sp, sp, #48
-  ret
+  mov   w0, wzr             // Set w0 ke 0 untuk keluar
+  ldp   fp, lr, [sp, #32] // Pulihkan frame pointer dan return address
+  add   sp, sp, #48         // Kembalikan sp ke posisi sebelumnya
+  ret                       // Kembali ke sistem operasi atau pengembalian fungsi
 
-.Lend:
-  .size main, .Lend-main
-  .section .rodata.str.1,"aMS",@progbits,1
-.L.str:
-  .asciz "%s\n"
+.end:
+  .size main, .end-main     // Ukuran fungsi main
+  .section .rodata
+.str:
+  .asciz "%s\n"             // Format string untuk printf
