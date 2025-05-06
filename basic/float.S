@@ -62,4 +62,5 @@ bl printf
 ldp fp, lr, [sp, 32]
 //kembalikan sp 16 untuk fp dan lr dan 16 untuk d0
 add sp, sp, 48
+mov x0, 0 // return value
 ret

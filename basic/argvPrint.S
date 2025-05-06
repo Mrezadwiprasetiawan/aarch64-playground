@@ -2,8 +2,8 @@
 .text
 main:
   sub   sp, sp, 48          // Alokasikan ruang stack 48 byte
-  stp   fp, lr, [sp, 32]  // Simpan frame pointer (x29) dan return address (x30)
-  add   fp, sp, 32         // Atur frame pointer (x29) ke sp+32
+  stp   fp, lr, [sp, 32]  // Simpan frame pointer (fp=x29) dan return address (lr=x30)
+  add   fp, sp, 32         // Atur frame pointer (fp=x29) ke sp+32
   stur  wzr, [fp, -4]      // Inisialisasi argc di sp-4 (padding karena argc int)
   stur  w0, [fp, -8]       // Simpan argc di sp-8
   stur   x1, [sp, 16]       // Simpan argv di sp+16
@@ -33,6 +33,7 @@ main:
   mov   w0, wzr             // Set w0 ke 0 untuk keluar
   ldp   fp, lr, [sp, #32] // Pulihkan frame pointer dan return address
   add   sp, sp, #48         // Kembalikan sp ke posisi sebelumnya
+  mov   x0, 0               // return value dari main
   ret                       // Kembali ke sistem operasi atau pengembalian fungsi
 
 .end:
